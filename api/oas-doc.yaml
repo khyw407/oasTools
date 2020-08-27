@@ -1,0 +1,210 @@
+openapi: 3.0.1
+info:
+  title: Hello World App
+  version: 0.0.1
+servers:
+- url: /v2
+paths:
+  /hello:
+    get:
+      description: Returns 'Hello' to the caller
+      operationId: hello
+      parameters:
+      - name: name
+        in: query
+        description: The name of the person to whom to say hello
+        schema:
+          type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelloWorldResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    x-swagger-router-controller: helloworld
+  /swagger:
+    x-swagger-pipe: swagger_raw
+  /management/schedule:
+    get:
+      tags:
+      - schedule
+      summary: return Schedule list
+      operationId: getList
+      responses:
+        200:
+          description: Schedule list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Schedules:
+                    type: object
+                    properties: {}
+    put:
+      tags:
+      - schedule
+      summary: update schedule
+      operationId: updateItem
+      requestBody:
+        x-name: body
+        description: 스케쥴을 변경한다.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Schedule'
+        required: true
+      responses:
+        200:
+          description: 처리 결과
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response'
+        500:
+          description: 오류 결과
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response'
+      x-codegen-request-body-name: body
+    post:
+      tags:
+      - schedule
+      summary: add new schedule
+      operationId: addItem
+      requestBody:
+        x-name: body
+        description: 새로운 스케쥴을 추가한다.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Schedule'
+        required: true
+      responses:
+        200:
+          description: 처리 결과
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response'
+        500:
+          description: 오류 결과
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response'
+      x-codegen-request-body-name: body
+    delete:
+      tags:
+      - schedule
+      summary: remove schedule
+      operationId: deleteItem
+      parameters:
+      - name: name
+        in: query
+        description: 스케쥴의 고유 이름
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: 처리 결과
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response'
+        500:
+          description: 오류 결과
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response'
+    patch:
+      tags:
+      - schedule
+      summary: control the operation of schedule
+      description: start/stop/restart
+      operationId: operateItem
+      requestBody:
+        description: program body
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Schedule Name
+                command:
+                  type: string
+                  example: start/stop/restart
+        required: true
+      responses:
+        200:
+          description: 처리 결과
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response'
+        500:
+          description: 오류 결과
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/response'
+      x-codegen-request-body-name: body
+    x-swagger-router-controller: schedule
+components:
+  schemas:
+    HelloWorldResponse:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+    ErrorResponse:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+    Schedule:
+      required:
+      - cron
+      - name
+      - workjs
+      type: object
+      properties:
+        name:
+          type: string
+          description: Schedule Name
+          example: scheduelName
+        cron:
+          type: string
+          description: Schedule Cron
+          example: '* * * * *'
+        workjs:
+          type: string
+          description: Schedule workjs
+          example: abc/abc/abc.js
+    response:
+      required:
+      - status
+      type: object
+      properties:
+        status:
+          type: string
+          description: 처리 성공 여부 ex) OK, ERROR
+        message:
+          type: string
+          description: 오류 사유
